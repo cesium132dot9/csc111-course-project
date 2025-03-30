@@ -27,15 +27,19 @@ class InflowCountyVertex:
 class InflowCountyGraph:
     """A graph of counties representing inflow migration."""
     vertices: dict[int, InflowCountyVertex]
+    num_nodes:int
 
     def __init__(self) -> None:
         self.vertices = {}
+        self.num_nodes = 0
 
     def add_vertex(self, county_id: int, county_name: str, state_name: str) -> InflowCountyVertex:
         """Add a vertex to the graph."""
 
         if county_id not in self.vertices:
             self.vertices[county_id] = InflowCountyVertex(county_id, county_name, state_name)
+            self.num_nodes += 1
+            # print(self.num_nodes)
         return self.vertices[county_id]
 
     def add_edge(self, source_id: int, source_name: str, source_state: str, dest_id: int, dest_name: str,
@@ -76,7 +80,7 @@ class InflowCountyGraph:
 
             if graph_nx.number_of_nodes() >= max_vertices:
                 break
-
+        
         return graph_nx
 
 
