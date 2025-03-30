@@ -1,7 +1,7 @@
 import networkx as nx
 from plotly.graph_objs import Scatter, Figure
 
-import county_graghs as cg
+from county_graghs import InflowCountyGraph
 
 
 # Colours to use when visualizing different clusters.
@@ -12,12 +12,12 @@ COLOUR_SCHEME = [
     '#6C4516', '#0D2A63', '#AF0038'
 ]
 
-LINE_COLOUR = 'rgb(210,210,210)'
+LINE_COLOUR = 'rgb(0,0,0)'
 VERTEX_BORDER_COLOUR = 'rgb(50, 50, 50)'
 
 
-def visualize_graph(graph: cg.InflowCountyGraph,
-                    layout: str = 'fruchterman_reingold_layout',
+def visualize_graph(graph: InflowCountyGraph,
+                    layout: str = 'forceatlas2_layout',
                     max_vertices: int = 5000,
                     output_file: str = '') -> None:
     """Use plotly and networkx to visualize the given graph.
@@ -30,11 +30,16 @@ def visualize_graph(graph: cg.InflowCountyGraph,
     """
     graph_nx = graph.to_networkx(max_vertices)
 
+    states = set(node[0] for node in graph_nx.nodes)
+    # state_colors = {state: COLOUR_SCHEME[i % len(COLOUR_SCHEME)] 
+    #                for i, state in enumerate(states)}
+
     pos = getattr(nx, layout)(graph_nx)
 
     x_values = [pos[k][0] for k in graph_nx.nodes]
     y_values = [pos[k][1] for k in graph_nx.nodes]
     labels = list(graph_nx.nodes)
+    # colors = [state_colors[node[0]] for node in graph_nx.nodes]
 
     x_edges = []
     y_edges = []
@@ -46,16 +51,17 @@ def visualize_graph(graph: cg.InflowCountyGraph,
                      y=y_edges,
                      mode='lines',
                      name='edges',
-                     line=dict(color=LINE_COLOUR, width=0.5),
+                     line=dict(color=LINE_COLOUR, width=0.1),
                      hoverinfo='none',
                      )
+    
     trace4 = Scatter(x=x_values,
                      y=y_values,
                      mode='markers',
                      name='nodes',
                      marker=dict(symbol='circle-dot',
                                  size=5,
-                                 line=dict(color=VERTEX_BORDER_COLOUR, width=0.5)
+                                 line=dict(color=VERTEX_BORDER_COLOUR, width=0.1)
                                  ),
                      text=labels,
                      hovertemplate='%{text}',
@@ -67,79 +73,6 @@ def visualize_graph(graph: cg.InflowCountyGraph,
     fig.update_layout({'showlegend': False})
     fig.update_xaxes(showgrid=False, zeroline=False, visible=False)
     fig.update_yaxes(showgrid=False, zeroline=False, visible=False)
-
-    if output_file == '':
-        fig.show()
-    else:
-        fig.write_image(output_file)
-
-
-def visualize_graph_clusters(graph: cg.InflowCountyGraph, clusters: list[set],
-                             layout: str = 'spring_layout',
-                             max_vertices: int = 5000,
-                             output_file: str = '') -> None:
-    """Visualize the given graph, using different colours to illustrate the different clusters.
-
-    Hides all edges that go from one cluster to another. (This helps the graph layout algorithm
-    positions vertices in the same cluster close together.)
-
-    Same optional arguments as visualize_graph (see that function for details).
-    """
-    graph_nx = graph.to_networkx(max_vertices)
-    all_edges = list(graph_nx.edges)
-    for edge in all_edges:
-        # Check if edge is within the same cluster
-        if any((edge[0] in cluster) != (edge[1] in cluster) for cluster in clusters):
-            graph_nx.remove_edge(edge[0], edge[1])
-
-    pos = getattr(nx, layout)(graph_nx)
-
-    x_values = [pos[k][0] for k in graph_nx.nodes]
-    y_values = [pos[k][1] for k in graph_nx.nodes]
-    labels = list(graph_nx.nodes)
-
-    colors = []
-    for k in graph_nx.nodes:
-        for i, c in enumerate(clusters):
-            if k in c:
-                colors.append(COLOUR_SCHEME[i % len(COLOUR_SCHEME)])
-                break
-        else:
-            colors.append(BOOK_COLOUR)
-
-    x_edges = []
-    y_edges = []
-    for edge in graph_nx.edges:
-        x_edges += [pos[edge[0]][0], pos[edge[1]][0], None]
-        y_edges += [pos[edge[0]][1], pos[edge[1]][1], None]
-
-    trace3 = Scatter(x=x_edges,
-                     y=y_edges,
-                     mode='lines',
-                     name='edges',
-                     line=dict(color=LINE_COLOUR, width=1),
-                     hoverinfo='none'
-                     )
-    trace4 = Scatter(x=x_values,
-                     y=y_values,
-                     mode='markers',
-                     name='nodes',
-                     marker=dict(symbol='circle-dot',
-                                 size=5,
-                                 color=colors,
-                                 line=dict(color=VERTEX_BORDER_COLOUR, width=0.5)
-                                 ),
-                     text=labels,
-                     hovertemplate='%{text}',
-                     hoverlabel={'namelength': 0}
-                     )
-
-    data1 = [trace3, trace4]
-    fig = Figure(data=data1)
-    fig.update_layout({'showlegend': False})
-    fig.update_xaxes(showgrid=False, zeroline=False, visible=False)
-    fig.update_yaxes(showgrid=False, zeroline=False, visible=False)
-    fig.show()
 
     if output_file == '':
         fig.show()

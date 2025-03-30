@@ -3,7 +3,6 @@ import csv
 from typing import Set
 import networkx as nx
 
-
 class InflowCountyVertex:
     """A vertex representing a county in the migration graph.
 
@@ -67,13 +66,13 @@ class InflowCountyGraph:
             v_names = (v.state_name, v.county_name)
             graph_nx.add_node(v_names)
 
-            for u in v.edges:
-                u_names = (u[0].state_name, u[0].county_name)
+            for u, amount in v.edges:
+                u_names = (u.state_name, u.county_name)
                 if graph_nx.number_of_nodes() < max_vertices:
                     graph_nx.add_node(u_names)
 
                 if u_names in graph_nx.nodes:
-                    graph_nx.add_edge(v_names, u_names)
+                    graph_nx.add_edge(v_names, u_names, weight = amount)
 
             if graph_nx.number_of_nodes() >= max_vertices:
                 break
