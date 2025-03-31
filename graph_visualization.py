@@ -50,9 +50,8 @@ def visualize_migration_graph(graph, max_vertices=3000, title="County Migration 
     
     for state in states:
         state_nodes = [node for node in graph_nx.nodes() if node[0] == state]
-        node_subset_sizes = [degrees[node] * 20 for node in state_nodes]
+        node_subset_sizes = [((degrees[node]/4)**1.4) * 20 for node in state_nodes]
         color_idx = state_to_idx[state]
-        print([cmap(color_idx)] * len(state_nodes))
         nx.draw_networkx_nodes(graph_nx, pos, nodelist=state_nodes, 
                               node_size=node_subset_sizes, 
                               edgecolors="black",
@@ -68,7 +67,7 @@ def visualize_migration_graph(graph, max_vertices=3000, title="County Migration 
         edge_color = cmap(color_idx)
         
         nx.draw_networkx_edges(graph_nx, pos, edgelist=[(u, v)], 
-                              width=graph_nx[u][v]['weight']*20 / max_edge_weight,
+                              width=graph_nx[u][v]['weight']*40 / max_edge_weight,
                               arrows=True, 
                               connectionstyle="arc3,rad=0.2", 
                               alpha=0.5, 
@@ -76,7 +75,7 @@ def visualize_migration_graph(graph, max_vertices=3000, title="County Migration 
     
     node_labels = {node: f"{node[1]},\n {node[0]}" for node in graph_nx.nodes()}
 
-    nx.draw_networkx_labels(graph_nx, pos, labels=node_labels, font_size= 2, font_weight="bold", font_color="white")
+    nx.draw_networkx_labels(graph_nx, pos, labels=node_labels, font_size= 3, font_weight="bold", font_color="white")
     
     
     plt.title(title)
