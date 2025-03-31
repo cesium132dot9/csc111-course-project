@@ -64,7 +64,7 @@ class InflowCountyGraph:
         return sorted_inflows[:n]
 
     def to_networkx(self, max_vertices: int = 5000) -> nx.Graph:
-        """"""
+        """Convert the InflowCountyGraph into a networkx graph"""
         graph_nx = nx.Graph()
         for v in self.vertices.values():
             v_names = (v.state_name, v.county_name)
@@ -80,7 +80,7 @@ class InflowCountyGraph:
 
             if graph_nx.number_of_nodes() >= max_vertices:
                 break
-        
+
         return graph_nx
 
 
