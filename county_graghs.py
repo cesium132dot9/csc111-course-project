@@ -65,6 +65,7 @@ class InflowCountyGraph:
 
     def to_networkx(self, max_vertices: int = 5000) -> nx.Graph:
         """Convert the InflowCountyGraph into a networkx graph"""
+
         graph_nx = nx.Graph()
         for v in self.vertices.values():
             v_names = (v.state_name, v.county_name)
